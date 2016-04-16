@@ -1,7 +1,9 @@
 #!/usr/bin/python
 import json
 import requests
+import time
 from config.setting import Setting
+import urllib
 
 """
 About:
@@ -45,12 +47,13 @@ class BdConnect:
         """
         url = self.url + "/oauth/access_token/client_id=" + self.data['client_id'] + \
               "/client_secret=" + self.data['client_key']
-        response = requests.get(url).json()
+
+        response = requests.get(url, verify=False).json()
         self.oauth_token = response['access_token']
-        self.header = {"Authorization": "bearer " + self.oauth_token}
+        self.header = {"Authorization": "bearer " + self.oauth_token, 'content-type': 'application/json'}
         return self.oauth_token
 
-    def get_sensor_list(self, call_type):
+    def get_sensor_list(self):
         """Gets the sensor list from Building depot
 
             Args :
@@ -59,12 +62,9 @@ class BdConnect:
             Returns:
                     sensor List
         """
-        if call_type == 'all_sensors':
-            url = self.url + "/api/list"
-            response = json.loads(requests.get(url, headers=self.header).text)
-        else:
-            url = self.url + "/api/mac_id=" + call_type + "/metadata"
-            response = json.loads(requests.get(url, headers=self.header).text)
+        string = "mac_id=" + urllib.quote_plus(self.data["mac_id"])
+        url = self.url + "/api/sensor/list?filter=metadata&" + string
+        response = requests.get(url, headers=self.header, verify=False).json()
         return response
 
     def check_sensor(self):
@@ -73,8 +73,8 @@ class BdConnect:
                     True : if valid mac_id
                     False: if invalid mac_id
         """
-        sensor_list = str(self.get_sensor_list('all_sensors'))
-        if self.data['mac_id'] in sensor_list:
+        sensor_list = self.get_sensor_list()
+        if len(sensor_list["data"]) > 0:
             return True
         else:
             return False
@@ -89,7 +89,7 @@ class BdConnect:
             temp = {}
 
         for key, val in self.data.iteritems():
-            check = ['client_id', 'client_key', 'device_id', 'name', \
+            check = ['client_id', 'client_key', 'device_id', 'name',
                      'identifier', 'building']
             if key not in check:
                 temp['name'] = key
@@ -98,6 +98,37 @@ class BdConnect:
                 temp = {}
 
         self.metadata += self.common_data
+
+    def timeseries_write(self, key, uuid):
+        """Updates the timeseries data of the sensor wrt to the uuid
+        and sensor points
+        Args :
+                        key:      name of the sensor point to get the sensor
+                                 reading value of the sensor point.
+                        uuid     :  uuid of the sensor point to updated.
+
+        Returns:
+                        {
+                                "success": "True"
+                                "HTTP Error 400": "Bad Request"
+                        }
+        """
+        url = self.url + "/api/sensor/timeseries"
+        payload = [{
+            "sensor_id": uuid,
+            "samples": [
+                {
+                    "time": time.time(),
+                    "value": self.sensor_data[key]
+                }
+            ]
+        }
+        ]
+        header = self.header
+        payload = json.dumps(payload)
+        response = requests.post(url, headers=header, data=payload, verify=False).json()
+        print response
+        return "Time Series updated " + json.dumps(response)
 
     def _add_meta_data(self, call_type, uuid):
         """Updates the meta data of the sensor wrt to the uuid
@@ -123,7 +154,7 @@ class BdConnect:
         headers['content-type'] = 'application/json'
         url = self.url + '/api/sensor/' + uuid + '/metadata'
         return requests.post(url, data=json.dumps(payload), \
-                             headers=headers).json()
+                             headers=headers, verify=False).json()
 
     def create_sensor_points(self):
         """ Create sensor points of a particular sensor and calls
@@ -139,11 +170,19 @@ class BdConnect:
         name = self.data['name']
         response = ''
         for key, val in self.sensor_data.iteritems():
-            url = self.url + '/api/sensor_create/name=%s/identifier=%s/building=%s' \
-                             % (key + '_' + name, identifier, building)
-            iresponse = requests.post(url, headers=self.header).json()
+            '''url = self.url + '/api/sensor?building=' + building + '&name=' +
+            key + "_" + name + '&identifier=' + identifier'''
+            url = self.url + '/api/sensor'
+            payload = {
+                'name': key,
+                'building': building,
+                'identifier': identifier
+            }
+            print payload
+            iresponse = requests.post(url, headers=self.header, data=json.dumps(payload), verify=False).json()
             temp = json.dumps(self._add_meta_data(key, iresponse['uuid']))
-            response = response + temp
+            res = json.dumps(self.timeseries_write(key, iresponse['uuid']))
+            response = response + temp + res
             response = response + "\n" + key + ' :' + json.dumps(iresponse)
         return response
 
@@ -157,14 +196,17 @@ class BdConnect:
             }
         """
         response = ''
-        sensor_list = self.get_sensor_list(self.data['mac_id'])['data']
+        res = ''
+        sensor_list = self.get_sensor_list()['data']
         # obtain the uuid of the sensor_points of the sensor and update
-        for key1, val1 in sensor_list.iteritems():
+        for temp in sensor_list:
             for key, val in self.sensor_data.iteritems():
-                if key + '_' + self.data['name'] == sensor_list[key1]["source_name"]:
-                    uuid = sensor_list[key1]["name"]
+                # print key + '_' + self.data['name']
+                if key == temp["source_name"]:
+                    uuid = temp["name"]
                     response = self._add_meta_data(key, uuid)
-        return "Metadata updated\n", response
+                    res = json.dumps(self.timeseries_write(key, uuid))
+        return "Metadata updated", response, res
 
 
 def get_json(data):
@@ -202,6 +244,5 @@ def get_json(data):
         else:
             return """Provide valid source_name,source_identifier,
                     email and building values"""
-
     else:
         return 'Please Enter correct client_id/client_key Details'
