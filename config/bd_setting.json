@@ -1,9 +1,13 @@
 {
-	"building": "Wean",
-	"client_key": "hz9VvBxAX03UxswJkR6W4T5WIxZ7JDpGDBYnjFVMSgqfsj4ccJ",
-	"client_id": "HUlkRVXWS0UbHFdzQAbxQKbYjbyeYHByhBRYAlMv",
-	"identifier": "randomsidentifier",
-	"email": "sud335@gmail.com",
-	"name":"randomsource_name",
-	"url":"http://128.2.113.192:82"
+	"building": "Newell Simon Hall",
+	"client_key": "EyS0hZQO4UDXNiyWrzgu9U2DRyTpHkA1i6KIcIYBaYARuDC4LF",
+	"client_id": "6EfwjGiwigWF5fFKEVpVGKrKKK2DDJ74lFIjOXO9",
+	"identifier": "Wemo_Laptop",
+	"name":"Wemo_Laptop",
+	"url":"http://bd-exp.andrew.cmu.edu",
+	"email":"sshubham369@gmail.com",
+	"oauth_port":":81",
+	"port":":82",
+	"type":"wemo",
+	"identity":"172.25.32.240"
 }

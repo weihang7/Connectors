@@ -20,7 +20,7 @@ assigned to the WeMo.It is recommended that you assign a static local IP to
 the WeMo to ensure the WeMo is always at that address.To run the code type
 "python sens_wemo.py" on the terminal
 """
-
+global status
 
 class WemoSensor:
     """Class definition of WemoSensor to send SOAP calls to
@@ -101,14 +101,12 @@ class WemoSensor:
                                         header: header of the Soap request
                                         body: body of the Soap request
                                         data: 0/1 to switch on/off
-
                        Returns:
                                 {
                                         Energy information or Status of wemo
                                         based on the request made
                                         or
                                         "HTTP Error 400": "Bad Request"
-
                                 } 
                 """
         try:
@@ -138,12 +136,14 @@ class WemoSensor:
                    work if device is connected retrieve device information in the
                    format"status=switch.energyinfo()"
                 """
+	
         wemo_cred = Setting("wemo")
         mac_id = wemo_cred.setting["mac_id"]
         edata = self.energy_info()
-        data = {'sensor_data': {}}
+        global data 
+	data = {'sensor_data': {}}
         data['sensor_data'].update(edata)
-        data['sensor_data'].update({"mac_id": mac_id})
+        data['sensor_data'].update({"mac_id": mac_id})	
 
 
 class WemoActuator:
@@ -158,7 +158,6 @@ class WemoActuator:
         """Initialises the IP of the Wemo Switch"""
         wemo_cred = Setting("wemo")
         self.ip = wemo_cred.setting["ip"]
-
     def toggle(self):
         """Toggle the switch
                    Switch status is on then switch off else
@@ -166,10 +165,10 @@ class WemoActuator:
         wemo_status = self.status()
         if wemo_status in self.ON_STATES:
             result = self.off()
-            # result = 'WeMo is now off.'
+            result = 'WeMo is now off.'
         elif wemo_status == self.OFF_STATE:
             result = self.on()
-            # result = 'WeMo is now on.'
+            result = 'WeMo is now on.'
         else:
             raise Exception("UnexpectedStatusResponse")
         return result
@@ -254,14 +253,12 @@ class WemoActuator:
                                         header: header of the Soap request
                                         body: body of the Soap request
                                         data: 0/1 to switch on/off
-
                        Returns:
                                 {
                                         Energy information or Status of wemo
                                         based on the request made
                                         or
                                         "HTTP Error 400": "Bad Request"
-
                                 } 
                 """
         try:
@@ -303,7 +300,6 @@ class WemoActuator:
 def main(arguments):
     """
         Accept the command to either read or actuate the Wemo Switch.
-
         Args as Data:
                         'r': Read the energy data from the Switch and
                         update the metadata on the Building Depot.
@@ -319,34 +315,34 @@ def main(arguments):
                         {on/off : success} else
                         {"Device Not Found/Error in fetching data"}         
     """
-    global status, data
+    
     cmd = arguments[1]
     if 'r' == cmd:
         switch = WemoSensor()
         try:
             switch = WemoSensor()
             switch.get_device_data()
-
+            
         except Exception as e:
             print "Device Not Found/Error in fetching data"
             print e
             exit(0)
-
+	    
         """Posts json object information to BD_Connect in this format
                    data={"sensor_data":{<all sensor data>},
                    "client_data":{<all client data>}}"""
         try:
-            print get_json(json.dumps(data))
+            get_json(json.dumps(data))
             print "Response from bd_connnect.py"
         except Exception as e:
             print e
     elif 'w' == cmd:
-        switch = WemoActuator()
+	switch = WemoActuator()
         try:
             # Uncomment any of these to actuate Wemo Switch
-            switch.output(switch.on())
+            # switch.output(switch.on())
             # output(switch.off())
-            # output(switch.toggle())
+              switch.output(switch.toggle())
             # output(switch.status())
         except Exception as e:
             print "Device Not Found"
