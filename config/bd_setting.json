@@ -1,13 +1,13 @@
 {
-	"building": "Newell Simon Hall",
-	"client_key": "EyS0hZQO4UDXNiyWrzgu9U2DRyTpHkA1i6KIcIYBaYARuDC4LF",
-	"client_id": "6EfwjGiwigWF5fFKEVpVGKrKKK2DDJ74lFIjOXO9",
-	"identifier": "Wemo_Laptop",
-	"name":"Wemo_Laptop",
-	"url":"http://bd-exp.andrew.cmu.edu",
-	"email":"sshubham369@gmail.com",
+	"building": "<buildingdemo>",
+	"client_key": "<clientkey>",
+	"client_id": "<clientid>",
+	"identifier": "<source-identifier>",
+	"name":"<source-name>",
+	"url":"<URL>",
+	"email":"<Email>",
 	"oauth_port":":81",
 	"port":":82",
-	"type":"wemo",
-	"identity":"172.25.32.240"
+	"type":"<name of device>",
+	"identity":"<IP,MAC-ID,etc which uniquely identifies device>"
 }

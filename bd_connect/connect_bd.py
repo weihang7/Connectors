@@ -3,7 +3,6 @@ import json
 import requests
 import time
 from config.setting import Setting
-import urllib
 
 """
 About:
@@ -27,7 +26,6 @@ Accept Actuation information for the sensor from Building Depot
 update the sensor values."""
 
 
-
 class BdConnect:
     def __init__(self, data):
         """Initialises the sensor data and client data of the sensors"""
@@ -37,11 +35,10 @@ class BdConnect:
         self.data["mac_id"] = self.sensor_data["mac_id"]
         self.sensor_data.pop("mac_id")
         self.url = bdcredentials.setting["url"]
-	self.oauthport =  bdcredentials.setting["oauth_port"]
-	self.port =  bdcredentials.setting["port"]
+        self.oauthport = bdcredentials.setting["oauth_port"]
+        self.port = bdcredentials.setting["port"]
         self.metadata = []
         self.common_data = []
-	
 
     def get_oauth_token(self):
         """Obtains the oauth token of the user from Building Depot
@@ -64,10 +61,10 @@ class BdConnect:
             Returns:
                     sensor List
         """
-        mac =self.data["mac_id"]	
-	data= {"data":{"Tags":["mac_id:"+mac]}}
+        mac = self.data["mac_id"]
+        data = {"data": {"Tags": ["mac_id:" + mac]}}
         url = self.url + self.oauthport + "/api/search"
-        response = requests.post(url, headers=self.header,data=json.dumps(data)).json()
+        response = requests.post(url, headers=self.header, data=json.dumps(data)).json()
         return response
 
     def check_sensor(self):
@@ -78,7 +75,7 @@ class BdConnect:
         """
         sensor_list = self.get_sensor_list()
         if len(sensor_list["result"]) > 0:
-	    print "true"
+            print "true"
             return True
         else:
             return False
@@ -94,7 +91,7 @@ class BdConnect:
 
         for key, val in self.data.iteritems():
             check = ['client_id', 'client_key', 'device_id', 'name',
-                     'identifier', 'building','oauth_port','port','url','email']
+                     'identifier', 'building', 'oauth_port', 'port', 'url', 'email']
             if key not in check:
                 temp['name'] = key
                 temp['value'] = val
@@ -116,8 +113,8 @@ class BdConnect:
                                 "HTTP Error 400": "Bad Request"
                         }
         """
-        url = self.url + self.port + "/api/sensor/timeseries"        
-	payload = [{
+        url = self.url + self.port + "/api/sensor/timeseries"
+        payload = [{
             "sensor_id": uuid,
             "samples": [
                 {
@@ -133,12 +130,14 @@ class BdConnect:
         return "Time Series updated " + json.dumps(response)
 
     def _add_meta_data(self, call_type, uuid):
-        """Updates the meta data of the sensor wrt to the uuid
+        """Updates the meta data of the sensor wrt to the uuid as Tags on
+           BuildingDepot
         and sensor points
         Args :
                         call_type: "rest_post" updates the meta data
                                    "None" updates the meta data of the
-                                    specific sensor points
+                                    specific sensor points as Tags on
+                                    BuildingDepot
                         uuid     :  uuid of the sensor point to updated
         Returns:
                         {
@@ -147,10 +146,10 @@ class BdConnect:
                         }
         """
         if call_type == "rest_post":
-          payload = {'data': self.metadata}
+            payload = {'data': self.metadata}
         else:
-          dic = {"name": call_type, "value": self.sensor_data[call_type]}
-          payload = {"data": self.common_data + [dic]}
+            dic = {"name": call_type, "value": self.sensor_data[call_type]}
+            payload = {"data": self.common_data + [dic]}
         headers = self.header
         headers['content-type'] = 'application/json'
         url = self.url + self.oauthport + '/api/sensor/' + uuid + '/tags'
@@ -159,7 +158,8 @@ class BdConnect:
 
     def create_sensor_points(self):
         """ Create sensor points of a particular sensor and calls
-            _add_meta_data() to add the metadata values
+            _add_meta_data() to add the metadata values as Tags on
+            BuildingDepot
             Returns:
             {
                 "success": "True" 
@@ -174,13 +174,14 @@ class BdConnect:
             '''url = self.url + '/api/sensor?building=' + building + '&name=' +
             key + "_" + name + '&identifier=' + identifier'''
             url = self.url + self.oauthport + '/api/sensor'
-            payload = {'data':{
+            payload = {'data': {
                 'name': key,
                 'building': building,
                 'identifier': identifier}
             }
-            iresponse = requests.post(url, headers=self.header, data=json.dumps(payload)).json()
-      	    temp = json.dumps(self._add_meta_data(key, iresponse['uuid']))
+            iresponse = requests.post(url, headers=self.header,\
+                                      data=json.dumps(payload)).json()
+            temp = json.dumps(self._add_meta_data(key, iresponse['uuid']))
             res = json.dumps(self.timeseries_write(key, iresponse['uuid']))
             response = response + temp + res
             response = response + "\n" + key + ' :' + json.dumps(iresponse)
@@ -188,7 +189,7 @@ class BdConnect:
 
     def rest_post(self):
         """Get the data of the sensor and calls _add_meta_data()
-            to add the metadata values
+            to add the metadata values as Tags on BuildingDepot
             Returns:
             {
                 "success": "True" 
@@ -206,7 +207,7 @@ class BdConnect:
                     uuid = temp["name"]
                     response = self._add_meta_data(key, uuid)
                     res = json.dumps(self.timeseries_write(key, uuid))
-        return "Metadata updated", response, res
+        return "Tag updated", response, res
 
 
 def get_json(data):
@@ -229,13 +230,13 @@ def get_json(data):
     if 'Invalid credentials' not in info.get_oauth_token():
         # Client_id and details are correct and token Generate access token
         print'Client id Verified'
-        """Function to create the meta data to be updated/created
+        """Function to create the metadata as Tags to be updated/created
             on Building Depot"""
         info.create_metadata()
         check = ('name', 'identifier', 'building')
         if set(check).issubset(info.data):
             """Check if UUID is given, if so update metadata else
-                create a new sensor and add metadata"""
+                create a new sensor and add metadata as Tags on BuildingDepot"""
             if not info.check_sensor():
                 return info.create_sensor_points()
             else:
