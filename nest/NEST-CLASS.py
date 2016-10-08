@@ -1,5 +1,6 @@
 import json
 import requests
+import time
 from bd_connect.connect_bd import get_json
 from config.setting import Setting
 from pprint import pprint
@@ -224,11 +225,14 @@ class DeviceList(object):
         """
         data = {'sensor_data': {}}
         data['sensor_data'].update(deviceData)
-        response = get_json(json.dumps(data))
+	try:
+        	response = get_json(json.dumps(data),'nest')
+	except e:
+		print e, "Please enter file name"
         return response
 
 if __name__ == "__main__":
-    """
+  """
     Reads the data from Nest Protect Devices and writes it to the building
     depot.
 
@@ -241,9 +245,10 @@ if __name__ == "__main__":
             {
                 "Error in Device Connection"
             }
-    """
-    from sys import exit, stderr
-
+  """
+  from sys import exit, stderr
+  while True:
+    time.sleep(2)
     try:
         auth = ClientAuth()  # Get authentication key
         if (auth._accessToken == None):

@@ -216,7 +216,10 @@ class DeviceList:
         data = {'sensor_data': {}}
         data['sensor_data'].update(stationdata)
         data['sensor_data'].update({"mac_id": mac_id})
-        response = get_json(json.dumps(data))
+	try:
+	        response = get_json(json.dumps(data),'netatmo')
+	except e:
+		print e,"Please enter the filename"
         return response
 
 
@@ -238,7 +241,7 @@ def get_request(url, params):
 
 
 if __name__ == "__main__":
-    """
+  """
     Reads the netatmo station data and writes it to the building depot.
 
     Returns:
@@ -250,9 +253,10 @@ if __name__ == "__main__":
             else
             {   "Error in Device Connection"
             }
-    """
-    from sys import exit, stderr
-
+  """
+  from sys import exit, stderr
+  while True:
+    time.sleep(2)
     try:
         auth = ClientAuth()  # Get authentication key
         if not auth.clientId or not auth.clientSecret or not auth.username \

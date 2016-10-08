@@ -1,9 +1,11 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import requests
+import time
 import warnings
 import json
 import sys
+import time
 from bd_connect.connect_bd import get_json
 from config.setting import Setting
 
@@ -108,9 +110,9 @@ class LifxSensor:
             mac_id = device["id"]
             name = device["label"].replace(" ", "_")
             for k in device["color"].keys():
-                lifx_data[k + "_" + name] = device["color"][k]
-            lifx_data["brightness_" + name] = device["brightness"]
-            lifx_data["status_" + name] = device["power"]
+                lifx_data[k] = device["color"][k]
+            lifx_data["brightness"] = device["brightness"]
+            lifx_data["status"] = device["power"]
             return self.post_to_bd(lifx_data)
 
     def post_to_bd(self, station_data):
@@ -135,9 +137,10 @@ class LifxSensor:
         data['sensor_data'].update(station_data)
         data['sensor_data'].update({"mac_id": mac_id})
         try:
-            resp = get_json(json.dumps(data))
+            print data
+            resp = get_json(json.dumps(data),'lifx')
         except Exception as e:
-            print e
+            print e,"Please provide the filename"
         return resp
 
     def get_request(self, url):
@@ -147,7 +150,6 @@ class LifxSensor:
                        url   : Url of lifx bulb
             Returns:
                     Lifx bulb device list and status
-                
         """
         headers = {
             "Authorization": "Bearer %s" % self.getclienttoken
@@ -191,8 +193,10 @@ def main(args):
 
                         {"Device Not Found/Error in fetching data"}
     """
+  
     from sys import exit, stderr
     if len(args) == 1:
+     while True:
         devlist = LifxSensor()
         if not devlist.getclienttoken:
             stderr.write("Please Enter the Client token from Lifx in\
@@ -221,4 +225,4 @@ def main(args):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+  main(sys.argv)

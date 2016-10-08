@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import json
+import time
 import requests
 from bd_connect.connect_bd import get_json
 from config.setting import Setting
@@ -122,7 +123,6 @@ class DeviceList:
                            params : cookie specific parameters
             Returns:
                           Sen.se mothers cookie and app data
-            
         """
         header = {'Authorization': u' Token ' + self.getAuthToken}
         response = requests.get(url, headers=header, params=params).json()
@@ -149,7 +149,10 @@ class DeviceList:
         data = {'sensor_data': {}}
         data['sensor_data'].update(mother_data)
         data['sensor_data'].update({"mac_id": self.mac_id})
-        response = get_json(json.dumps(data))
+	try:
+        	response = get_json(json.dumps(data),'mother')
+	except e:
+		print e,"Please add the file name"
         return response
 
 
@@ -166,25 +169,24 @@ if __name__ == '__main__':
                 }
                 else
                 {"Error in Device Connection"}
-        
-        
     """
     from sys import exit, stderr
+    while True:
+      time.sleep(2)
+      try:
+          auth = ClientAuth()
+          if not auth.username or not auth.password:
+              stderr.write("Please Enter the Sense Mothers username and password")
+              exit(1)
+          devList = DeviceList(auth)  # Obtain the Device List
+          mother_data = devList.get_mother_data()  # Get the Mother sensor data
+  
+          try:
+              resp = devList.post_to_bd(mother_data)  # Send Data to the BuildingDepot
+              print resp
+          except Exception as e:
+              print "Error in Sending data to connect_bd.py", e
 
-    try:
-        auth = ClientAuth()
-        if not auth.username or not auth.password:
-            stderr.write("Please Enter the Sense Mothers username and password")
-            exit(1)
-        devList = DeviceList(auth)  # Obtain the Device List
-        mother_data = devList.get_mother_data()  # Get the Mother sensor data
+      except Exception as e:
 
-        try:
-            resp = devList.post_to_bd(mother_data)  # Send Data to the BuildingDepot
-            print resp
-        except Exception as e:
-            print "Error in Sending data to connect_bd.py", e
-
-    except Exception as e:
-
-        print "Error in Device Connection", e
+          print "Error in Device Connection", e

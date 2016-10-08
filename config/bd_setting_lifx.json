@@ -1,0 +1,13 @@
+{
+	"building": "Google Bldg SL100",
+	"client_key": "dZV3iMakwGmNCtwvc0ec4VDMivMRr3Z4ku9Nun0UoBTMF6Wxp7",
+	"client_id": "4mqRKIuIaVHXogCa0tC0WaB61adJiucNFrQk2hZh",
+	"identifier": "lifx",
+	"name":"lifx",
+	"url":"http://google-demo.andrew.cmu.edu",
+	"email":"admin@buildingdepot.org",
+	"oauth_port":":81",
+	"port":":82",
+	"type":"lifx",
+	"identity":"all"
+}
