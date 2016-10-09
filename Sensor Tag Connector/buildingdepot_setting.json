@@ -1,0 +1,13 @@
+{
+	"buildingdepot_rest_api":{
+		"server":"http://127.0.0.1",
+		"oauth_port":"81",
+		"port":"82",
+		"api_prefix":"/api"
+	},
+
+	"oauth":{
+		"id":"blfx1pvIvQd271lGXdjDQbvDGNjJeiaxxOHhwhc5",
+		"key":"4PrPr9aM16SPaH76blDcx0op6I1tksJuoNq1Htl0uGE353GDXh"
+	}
+}

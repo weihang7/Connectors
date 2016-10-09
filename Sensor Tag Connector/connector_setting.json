@@ -1,0 +1,21 @@
+{
+	"sensor_uuids":[
+		"274bfbca-c2c9-47b3-a445-5ead80d7bdf5",
+		"3ee95ae9-2de6-40b8-9199-21a769419244",
+		"5eaee1c8-9439-4c69-842c-f0f87ffd1b22",
+		"63bac3d8-26fa-4cda-a418-07c67de9f266",
+		"5142e8ea-1148-407f-b274-31b2f0b99fd1",
+		"e4547518-1a5e-4dd4-bb83-00742f026edb",
+		"f1a8b279-b88d-487a-af50-fba31a9c9667",
+		"cefcad5a-b1c9-43c3-bf23-77448a913a15",
+		"978c93d0-5ce0-4642-a26e-708d1ed63aea",
+		"6f6fe97f-4489-4235-8692-1fc791032169",
+		"5cd95766-9f14-43d8-8a1d-1b5d875ffb53",
+		"0a102837-8e20-4bda-9608-6eab3d624afa",
+		"8a6b3873-3dbd-4c44-9922-74d32f7ae17a",
+		"e4c62a3a-b569-44a3-a0b9-d044a291c534"
+	],
+	"sensor_tag":{
+		"mac_address":"B0:B4:48:B9:7C:00"
+	}
+}
