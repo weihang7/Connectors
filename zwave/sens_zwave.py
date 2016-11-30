@@ -1,0 +1,83 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+
+This file is part of **python-openzwave** project https://github.com/OpenZWave/python-openzwave.
+    :platform: Unix, Windows, MacOS X
+    :sinopsis: openzwave wrapper
+
+.. moduleauthor:: bibi21000 aka Sébastien GALLET <bibi21000@gmail.com>
+
+License : GPL(v3)
+
+**python-openzwave** is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+**python-openzwave** is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+You should have received a copy of the GNU General Public License
+along with python-openzwave. If not, see http://www.gnu.org/licenses.
+
+"""
+import sys, os
+import time
+import libopenzwave
+from libopenzwave import PyManager
+
+device="/dev/ttyACM0"
+log="Warning"
+sniff=5.0
+
+for arg in sys.argv:
+    if arg.startswith("--device"):
+        temp,device = arg.split("=")
+    if arg.startswith("--help"):
+        print("help : ")
+        print("  --device=/dev/yourdevice ")
+        exit(0)
+
+class ZWaveSensor:
+    def __init__(self):
+        self.options = libopenzwave.PyOptions(config_path="./config", \
+          user_path=".", cmd_line="--logging false")
+
+        # Specify the open-zwave config path here
+        self.options.lock()
+
+    def get_data(self):
+        manager = libopenzwave.PyManager()
+        manager.create()
+
+        # callback order: (notificationtype, homeid, nodeid, ValueID, groupidx, event)
+        def callback(args):
+            print('\n-------------------------------------------------')
+            print('\n[{}]:\n'.format(args['notificationType']))
+            if args:
+                print('homeId: 0x{0:08x}'.format(args['homeId']))
+                print('nodeId: {}'.format(args['nodeId']))
+                if 'valueId' in args:
+                    v = args['valueId']
+                    print v
+                    print('valueID: {}'.format(v['id']))
+                    if v.has_key('groupIndex') and v['groupIndex'] != 0xff: print('GroupIndex: {}'.format(v['groupIndex']))
+                    if v.has_key('event') and v['event'] != 0xff: print('Event: {}'.format(v['event']))
+                    if v.has_key('value'): print('Value: {}'.format(str(v['value'])))
+                    if v.has_key('label'): print('Label: {}'.format(v['label']))
+                    if v.has_key('units'): print('Units: {}'.format(v['units']))
+                    if v.has_key('readOnly'): print('ReadOnly: {}'.format(v['readOnly']))
+            print('-------------------------------------------------\n')
+
+        manager.addWatcher(callback)
+        manager.addDriver(device)
+        # Sniff for sniff seconds
+        time.sleep(sniff)
+        manager.removeWatcher(callback)
+        manager.removeDriver(device)
+
+if __name__ == '__main__':
+    obj = ZWaveSensor()
+    obj.get_data()
