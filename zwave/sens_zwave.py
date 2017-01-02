@@ -208,8 +208,8 @@ if __name__ == '__main__':
                     'ispolled':network.nodes[node].values[val].is_polled,
                     'id_on_network': network.nodes[node].values[val].id_on_network
                 },
-                'name': network.nodes[node].product_name + '.' + network.nodes[node].values[val].label,
-                'identifier': network.nodes[node].product_id + '.' + network.nodes[node].values[val].object_id
+                'sensor_name': network.nodes[node].product_name + '.' + network.nodes[node].values[val].label,
+                'sensor_id': network.nodes[node].product_id + '.' + network.nodes[node].values[val].object_id
             }
             sensor_data[network.nodes[node].values[val].object_id]['metadata'].update(node_metadata)
         # Retrieve switches on the node
